@@ -11,6 +11,10 @@ const PORT = process.env.PORT || 5000;
 app.use(cors());
 app.use(express.json({ limit: '10mb' })); // Increased limit to handle base64 images
 
+// Serve static files from the React frontend
+const clientDistPath = path.resolve(__dirname, '../client/dist');
+app.use(express.static(clientDistPath));
+
 // Database Setup
 const dbFileName = process.env.DB_FILENAME || 'database.sqlite';
 const dbPath = path.resolve(__dirname, dbFileName);
@@ -141,6 +145,11 @@ app.delete('/api/inventory/:id', (req, res) => {
     }
     res.json({ message: 'Item deleted successfully', changes: this.changes });
   });
+});
+
+// Fallback to React app index.html for any unknown route (React router support)
+app.get('*', (req, res) => {
+  res.sendFile(path.join(clientDistPath, 'index.html'));
 });
 
 // Start the server
